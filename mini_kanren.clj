@@ -1,9 +1,9 @@
 ;; Mini-Kanren implemented in Clojure
 
 ;; by Jim Duey
-;; last updated February 25, 2009
+;; last updated March 23, 2010
 
-;; Copyright (c) Jim Duey, 2009. All rights reserved.  The use
+;; Copyright (c) Jim Duey, 2009, 2010. All rights reserved.  The use
 ;; and distribution terms for this software are covered by the Eclipse
 ;; Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 ;; which can be found in the file epl-v10.html at the root of this
