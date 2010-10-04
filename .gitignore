@@ -1,0 +1,6 @@
+pom.xml
+*jar
+lib
+classes
+clojars
+.*.swp
