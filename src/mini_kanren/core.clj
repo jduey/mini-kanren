@@ -145,9 +145,12 @@ sequence is in the tail"
   (let [v (lget s v)]
     (cond
       (lvar? v) v
-      (lseq? v) (if (:tail (meta v))
+      (lseq? v) (let [sq (if (:tail (meta v))
                   (concat (map (partial deep-lget s) v) [| (deep-lget s (:tail (meta v)))])
-                  (map (partial deep-lget s) v))
+                  (map (partial deep-lget s) v))]
+                  (if (vector? v)
+                    (vec sq)
+                    sq))
       :else v)))
 
 (defn deep-reify [s v]
@@ -162,7 +165,7 @@ sequence is in the tail"
                            {:tail (:tail (meta v))})
       :else s)))
 
-(defn reify [v]
+(defn mk-reify [v]
  "Assign an indeterminate value to 'v'"
 	  (deep-lget (deep-reify {} v) v))
 
@@ -182,10 +185,14 @@ sequence is in the tail"
     (= _ v) (lvar)
     (is-seq? v) (if (contains? (meta v) :tail)
                   (let [new-v (with-meta (map _-to-lvar v) (meta v))]
-                    new-v)
+                    (if (vector? v)
+                      (vec new-v)
+                      new-v))
                   (let [[sq tail] (split-with (partial not= |) v)
                         new-v (with-meta (map _-to-lvar sq) {:tail (_-to-lvar (second tail))})]
-                    new-v))
+                    (if (vector? v)
+                      (vec new-v)
+                      new-v)))
     :else v))
 
 (defn- safe-assoc [x v s]
@@ -331,7 +338,7 @@ sequence is in the tail"
 			(remove-else c-list)))
 
 (defn- build-questions [c-list]
-	   (map #(cons 'test-question %)
+	   (map #(cons 'mini-kanren.core/test-question %)
 			(remove-else c-list)))
 
 ; the mini-kanren operators
@@ -383,7 +390,7 @@ sequence is in the tail"
   `(with-monad logic-m
 			   (let [~x (lvar)]
 				 (map (fn [s#]
-						  (reify (deep-lget s# ~x)))
+						  (mk-reify (deep-lget s# ~x)))
 					  (filter (complement nil?)
 							  ((m-chain (list ~@goals)) {}))))))
 
@@ -437,6 +444,16 @@ the first element of 'l'."
 						   (rest-o l r)
 						   (list-o r)))
 		(else fail)))
+
+(defn map-o [m]
+  (fn [s]
+    (when (map? (deep-lget s m))
+      (list s))))
+
+(defn vector-o [m]
+  (fn [s]
+    (when (vector? (deep-lget s m))
+      (list s))))
 
 (defn lol-o [l]
 	  (cond-e
