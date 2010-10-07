@@ -146,8 +146,9 @@ sequence is in the tail"
     (cond
       (lvar? v) v
       (lseq? v) (let [sq (if (:tail (meta v))
-                  (concat (map (partial deep-lget s) v) [| (deep-lget s (:tail (meta v)))])
-                  (map (partial deep-lget s) v))]
+                           (concat (map (partial deep-lget s) v)
+                                   [| (deep-lget s (:tail (meta v)))])
+                           (map (partial deep-lget s) v))]
                   (if (vector? v)
                     (vec sq)
                     sq))
@@ -189,10 +190,11 @@ sequence is in the tail"
                       (vec new-v)
                       new-v))
                   (let [[sq tail] (split-with (partial not= |) v)
-                        new-v (with-meta (map _-to-lvar sq) {:tail (_-to-lvar (second tail))})]
+                        new-v (map _-to-lvar sq)
+                        new-meta {:tail (_-to-lvar (second tail))}]
                     (if (vector? v)
-                      (vec new-v)
-                      new-v)))
+                      (with-meta (vec new-v) new-meta)
+                      (with-meta new-v new-meta))))
     :else v))
 
 (defn- safe-assoc [x v s]
